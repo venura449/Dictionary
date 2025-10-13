@@ -641,8 +641,8 @@ $stats = $sinhalaWords->getStats();
         </div>
         <div class="sidebar-menu">
             <ul>
-                <li><a href="yomupath.php"><i class="fas fa-home"></i> <span>සිංහල ශබ්දකෝෂ දත්ත යොමුව</span></a></li>
-                <li class="active"><a href="sinhala_words.php"><i class="fas fa-language"></i> <span>යොමු පත් අකාරාදිය</span></a></li>
+                <li><a href="yomupath.php"><i class="fas fa-home"></i> <span>යොමු පත් අකාරාදිය</span></a></li>
+                <li class="active"><a href="sinhala_words.php"><i class="fas fa-language"></i> <span>සිංහල ශබ්දකෝෂ දත්ත යොමුව</span></a></li>
             </ul>
         </div>
     </div>
