@@ -1,9 +1,9 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require_once '../../Config/auth.php';
-require_once '../../Config/SinhalaWords.php';
+require_once '../../Config/AksharaVinyasaData.php';
 
-$sinhalaWords = new SinhalaWords();
+$aksharaData = new AksharaVinyasaData();
 $action = $_GET['action'] ?? '';
 
 try {
@@ -15,14 +15,14 @@ try {
             $sortBy = $_GET['sortBy'] ?? 'id';
             $sortOrder = $_GET['sortOrder'] ?? 'ASC';
             
-            $result = $sinhalaWords->getPaginatedData($page, $limit, $search, $sortBy, $sortOrder);
+            $result = $aksharaData->getPaginatedData($page, $limit, $search, $sortBy, $sortOrder);
             echo json_encode($result);
             break;
             
         case 'get_record':
             $id = (int)($_GET['id'] ?? 0);
             if ($id > 0) {
-                $record = $sinhalaWords->getById($id);
+                $record = $aksharaData->getById($id);
                 echo json_encode(['success' => true, 'data' => $record]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Invalid ID']);
@@ -35,13 +35,13 @@ try {
             
             if (isset($data['id']) && $data['id'] > 0) {
                 // Update existing record
-                $success = $sinhalaWords->update($data['id'], $data);
-                $message = $success ? 'Word updated successfully' : 'Failed to update word';
+                $success = $aksharaData->update($data['id'], $data);
+                $message = $success ? 'Record updated successfully' : 'Failed to update record';
             } else {
                 // Insert new record
-                $id = $sinhalaWords->insert($data);
+                $id = $aksharaData->insert($data);
                 $success = $id !== false;
-                $message = $success ? 'Word added successfully' : 'Failed to add word';
+                $message = $success ? 'Record added successfully' : 'Failed to add record';
             }
             
             echo json_encode(['success' => $success, 'message' => $message]);
@@ -51,8 +51,8 @@ try {
             auth_require_admin_api();
             $id = (int)($_GET['id'] ?? 0);
             if ($id > 0) {
-                $success = $sinhalaWords->delete($id);
-                $message = $success ? 'Word deleted successfully' : 'Failed to delete word';
+                $success = $aksharaData->delete($id);
+                $message = $success ? 'Record deleted successfully' : 'Failed to delete record';
                 echo json_encode(['success' => $success, 'message' => $message]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Invalid ID']);
@@ -60,14 +60,14 @@ try {
             break;
             
         case 'get_stats':
-            $stats = $sinhalaWords->getStats();
+            $stats = $aksharaData->getStats();
             echo json_encode(['success' => true, 'data' => $stats]);
             break;
             
         case 'get_suggestions':
             $term = $_GET['term'] ?? '';
             if (!empty($term)) {
-                $suggestions = $sinhalaWords->getSearchSuggestions($term);
+                $suggestions = $aksharaData->getSearchSuggestions($term);
                 echo json_encode(['success' => true, 'data' => $suggestions]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'No search term provided']);
@@ -75,7 +75,7 @@ try {
             break;
             
         case 'get_categories':
-            $categories = $sinhalaWords->getCategories();
+            $categories = $aksharaData->getCategories();
             echo json_encode(['success' => true, 'data' => $categories]);
             break;
             
@@ -87,3 +87,4 @@ try {
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
 ?>
+

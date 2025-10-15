@@ -1,8 +1,11 @@
 <?php
+require_once '../../Config/auth.php';
 require_once '../../Config/SinhalaWords.php';
 
 $sinhalaWords = new SinhalaWords();
 $stats = $sinhalaWords->getStats();
+$user = auth_current_user();
+$isAdmin = auth_is_admin();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -636,13 +639,15 @@ $stats = $sinhalaWords->getStats();
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <i class="fas fa-book"></i>
+            <img src="../../assets/logo.jpg" alt="Logo" style="width:28px;height:28px;display:block;" />
             <h2>සිංහල ශබ්දකෝෂ දත්ත පද්ධතිය</h2>
         </div>
         <div class="sidebar-menu">
             <ul>
                 <li><a href="yomupath.php"><i class="fas fa-home"></i> <span>යොමු පත් අකාරාදිය</span></a></li>
                 <li class="active"><a href="sinhala_words.php"><i class="fas fa-language"></i> <span>සිංහල ශබ්දකෝෂ දත්ත යොමුව</span></a></li>
+                <li><a href="akshara_vinyasa.php"><i class="fas fa-spell-check"></i> <span>අක්ෂර වින්‍යාස ශබ්දකෝෂය</span></a></li>
+                <li><a href="akshara_search.php"><i class="fas fa-search"></i> <span>අක්ෂර වින්‍යාස සෙවීම</span></a></li>
             </ul>
         </div>
     </div>
@@ -652,12 +657,15 @@ $stats = $sinhalaWords->getStats();
         <div class="header">
             <h1>සිංහල ශබ්දකෝෂ දත්ත පද්ධතිය</h1>
             <div class="user-info">
-                <i class="fas fa-user-circle"></i> Admin User
+                <i class="fas fa-user-circle"></i>
+                <?php if ($user) { echo htmlspecialchars($user['name'] . ' (' . $user['email'] . ')'); } else { echo 'Guest'; } ?>
+                <?php if ($user) { ?>
+                    | <a href="#" id="logoutLink" style="color: #e74c3c; text-decoration: none;">Logout</a>
+                <?php } else { ?>
+                    | <a href="login.php" style="color: #3498db; text-decoration: none;">Login</a>
+                    | <a href="register.php" style="color: #2ecc71; text-decoration: none;">Register</a>
+                <?php } ?>
             </div>
-        </div>
-
-        <div class="breadcrumb">
-            <a href="yomupath.php">Dashboard</a> / <span>Sinhala Words</span>
         </div>
 
         <!-- Alert Messages -->
@@ -705,7 +713,9 @@ $stats = $sinhalaWords->getStats();
                         <button class="btn btn-primary" id="searchBtn"><i class="fas fa-search"></i> Search</button>
                         <button class="btn btn-warning" id="clearSearchBtn"><i class="fas fa-times"></i> Clear</button>
                     </div>
+                    <?php if ($isAdmin) { ?>
                     <button class="btn btn-success" id="addWordBtn"><i class="fas fa-plus"></i> Add New Word</button>
+                    <?php } ?>
                 </div>
             </div>
 
@@ -828,6 +838,7 @@ $stats = $sinhalaWords->getStats();
     </div>
 
     <script>
+        const IS_ADMIN = <?php echo $isAdmin ? 'true' : 'false'; ?>;
         // Global variables
         let currentPage = 1;
         let currentLimit = 50;
@@ -899,7 +910,9 @@ $stats = $sinhalaWords->getStats();
             });
 
             // Modal functionality
-            addWordBtn.addEventListener('click', openAddModal);
+            if (addWordBtn) {
+                addWordBtn.addEventListener('click', openAddModal);
+            }
             closeBtn.addEventListener('click', closeModal);
             cancelBtn.addEventListener('click', closeModal);
             saveBtn.addEventListener('click', saveRecord);
@@ -935,6 +948,19 @@ $stats = $sinhalaWords->getStats();
                     this.parentElement.style.display = 'none';
                 });
             });
+            // Logout
+            const logoutLink = document.getElementById('logoutLink');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    try {
+                        await fetch('auth_api.php?action=logout');
+                        window.location.reload();
+                    } catch (err) {
+                        window.location.reload();
+                    }
+                });
+            }
         }
 
         function loadData() {
@@ -1016,12 +1042,8 @@ $stats = $sinhalaWords->getStats();
                         <button class="action-btn view-btn" onclick="viewRecord(${record.id})" title="View Details">
                             <i class="fas fa-eye"></i> View
                         </button>
-                        <button class="action-btn edit-btn" onclick="editRecord(${record.id})" title="Edit">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="Delete">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
+                        ${IS_ADMIN ? `
+                        <button class=\"action-btn edit-btn\" onclick=\"editRecord(${record.id})\" title=\"Edit\">\n                            <i class=\"fas fa-edit\"></i> Edit\n                        </button>\n                        <button class=\"action-btn delete-btn\" onclick=\"deleteRecord(${record.id})\" title=\"Delete\">\n                            <i class=\"fas fa-trash\"></i> Delete\n                        </button>` : ''}
                     </td>
                 `;
                 tableBody.appendChild(row);

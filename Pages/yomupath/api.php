@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
+require_once '../../Config/auth.php';
 require_once '../../Config/SinhalaData.php';
 
 $sinhalaData = new SinhalaData();
@@ -29,6 +30,7 @@ try {
             break;
             
         case 'save_record':
+            auth_require_admin_api();
             $data = json_decode(file_get_contents('php://input'), true);
             
             if (isset($data['id']) && $data['id'] > 0) {
@@ -46,6 +48,7 @@ try {
             break;
             
         case 'delete_record':
+            auth_require_admin_api();
             $id = (int)($_GET['id'] ?? 0);
             if ($id > 0) {
                 $success = $sinhalaData->delete($id);

@@ -1,9 +1,9 @@
 <?php
 require_once '../../Config/auth.php';
-require_once '../../Config/SinhalaData.php';
+require_once '../../Config/AksharaVinyasaData.php';
 
-$sinhalaData = new SinhalaData();
-$stats = $sinhalaData->getStats();
+$aksharaData = new AksharaVinyasaData();
+$stats = $aksharaData->getStats();
 $user = auth_current_user();
 $isAdmin = auth_is_admin();
 ?>
@@ -12,7 +12,7 @@ $isAdmin = auth_is_admin();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sinhala Dictionary Management System</title>
+    <title>අක්ෂර වින්‍යාස ශබ්දකෝෂය - Akshara Vinyasa Dictionary</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -156,11 +156,11 @@ $isAdmin = auth_is_admin();
             border-top: 4px solid var(--primary);
         }
 
-        .card.edited {
+        .card.categories {
             border-top: 4px solid var(--warning);
         }
 
-        .card.new {
+        .card.recent {
             border-top: 4px solid var(--success);
         }
 
@@ -564,14 +564,14 @@ $isAdmin = auth_is_admin();
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <img src="../../Assets/logo.jpg" alt="Logo" style="width:48px;height:48px;display:block;" />
-            <h2>කාර්යාලයීය අතුරු මුහුණත</h2>
+            <img src="../../assets/logo.jpg" alt="Logo" style="width:28px;height:28px;display:block;" />
+            <h2>සිංහල ශබ්දකෝෂ දත්ත පද්ධතිය</h2>
         </div>
         <div class="sidebar-menu">
             <ul>
-                <li class="active"><i class="fas fa-home"></i> <span>යොමු පත් අකාරාදිය</span></li>
+                <li><a href="yomupath.php"><i class="fas fa-home"></i> <span>යොමු පත් අකාරාදිය</span></a></li>
                 <li><a href="sinhala_words.php"><i class="fas fa-language"></i> <span>සිංහල ශබ්දකෝෂ දත්ත යොමුව</span></a></li>
-                <li><a href="akshara_vinyasa.php"><i class="fas fa-spell-check"></i> <span>අක්ෂර වින්‍යාස ශබ්දකෝෂය</span></a></li>
+                <li class="active"><i class="fas fa-spell-check"></i> <span>අක්ෂර වින්‍යාස ශබ්දකෝෂය</span></li>
                 <li><a href="akshara_search.php"><i class="fas fa-search"></i> <span>අක්ෂර වින්‍යාස සෙවීම</span></a></li>
             </ul>
         </div>
@@ -580,7 +580,7 @@ $isAdmin = auth_is_admin();
     <!-- Main Content -->
     <div class="main-content">
         <div class="header">
-            <h1>සිංහල ශබ්දකෝෂ දත්ත පද්ධතිය</h1>
+            <h1>අක්ෂර වින්‍යාස ශබ්දකෝෂය - Akshara Vinyasa Dictionary</h1>
             <div class="user-info">
                 <i class="fas fa-user-circle"></i>
                 <?php if ($user) { echo htmlspecialchars($user['name'] . ' (' . $user['email'] . ')'); } else { echo 'Guest'; } ?>
@@ -610,25 +610,25 @@ $isAdmin = auth_is_admin();
                 <h3 id="totalEntries"><?php echo number_format($stats['total']); ?></h3>
                 <p>Total Entries</p>
             </div>
-            <div class="card edited">
-                <i class="fas fa-edit"></i>
-                <h3 id="editedToday"><?php echo number_format($stats['edited_today']); ?></h3>
-                <p>Edited Today</p>
+            <div class="card categories">
+                <i class="fas fa-tags"></i>
+                <h3 id="totalCategories"><?php echo number_format($stats['categories']); ?></h3>
+                <p>Categories</p>
             </div>
-            <div class="card new">
-                <i class="fas fa-plus"></i>
-                <h3 id="newThisWeek"><?php echo number_format($stats['new_this_week']); ?></h3>
-                <p>New This Week</p>
+            <div class="card recent">
+                <i class="fas fa-clock"></i>
+                <h3 id="recentEntries"><?php echo number_format($stats['recent']); ?></h3>
+                <p>Recent Entries</p>
             </div>
         </div>
 
         <!-- Table Container -->
         <div class="table-container">
             <div class="table-header">
-                <h3>Dictionary Entries</h3>
+                <h3>අක්ෂර වින්‍යාස Dictionary Entries</h3>
                 <div class="table-actions">
                     <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Search entries...">
+                        <input type="text" id="searchInput" placeholder="Search words, categories, meanings...">
                         <div class="suggestions" id="suggestions"></div>
                         <button class="btn btn-primary" id="searchBtn"><i class="fas fa-search"></i> Search</button>
                         <button class="btn btn-warning" id="clearSearchBtn"><i class="fas fa-times"></i> Clear</button>
@@ -648,12 +648,10 @@ $isAdmin = auth_is_admin();
                 <thead>
                     <tr>
                         <th class="sortable" data-sort="id">ID</th>
-                        <th class="sortable" data-sort="Timestamp">Timestamp</th>
-                        <th class="sortable" data-sort="වචනය">වචනය</th>
-                        <th class="sortable" data-sort="උද්ධෘතය">උද්ධෘතය</th>
-                        <th class="sortable" data-sort="කෙටි_නාමය">කෙටි_නාමය</th>
-                        <th class="sortable" data-sort="පිටුව_හා_පේළිය">පිටුව_හා_පේළිය</th>
-                        <th class="sortable" data-sort="සංස්කාරක">සංස්කාරක</th>
+                        <th class="sortable" data-sort="වචනය">වචනය (Word)</th>
+                        <th class="sortable" data-sort="ප්‍රවර්ගය">ප්‍රවර්ගය (Category)</th>
+                        <th class="sortable" data-sort="අර්ථය">අර්ථය (Meaning)</th>
+                        <th class="sortable" data-sort="නිරුක්තිය">නිරුක්තිය (Etymology)</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -688,20 +686,16 @@ $isAdmin = auth_is_admin();
                         <input type="text" id="word" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="quote">උද්ධෘතය (Quote) *</label>
-                        <textarea id="quote" class="form-control" required></textarea>
+                        <label for="category">ප්‍රවර්ගය (Category) *</label>
+                        <input type="text" id="category" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="shortName">කෙටි_නාමය (Short Name) *</label>
-                        <input type="text" id="shortName" class="form-control" required>
+                        <label for="meaning">අර්ථය (Meaning) *</label>
+                        <textarea id="meaning" class="form-control" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="pageLine">පිටුව_හා_පේළිය (Page and Line) *</label>
-                        <input type="text" id="pageLine" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editor">සංස්කාරක (Editor) *</label>
-                        <input type="text" id="editor" class="form-control" required>
+                        <label for="etymology">නිරුක්තිය (Etymology) *</label>
+                        <textarea id="etymology" class="form-control" required></textarea>
                     </div>
                 </form>
             </div>
@@ -846,7 +840,7 @@ $isAdmin = auth_is_admin();
                 sortOrder: currentSortOrder
             });
 
-            fetch(`api.php?${params}`)
+            fetch(`akshara_api.php?${params}`)
                 .then(response => response.json())
                 .then(data => {
                     showLoading(false);
@@ -868,7 +862,7 @@ $isAdmin = auth_is_admin();
             tableBody.innerHTML = '';
             
             if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No records found</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No records found</td></tr>';
                 return;
             }
 
@@ -876,12 +870,10 @@ $isAdmin = auth_is_admin();
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${record.id}</td>
-                    <td>${formatDate(record.Timestamp)}</td>
                     <td>${escapeHtml(record.වචනය)}</td>
-                    <td>${escapeHtml(record.උද්ධෘතය)}</td>
-                    <td>${escapeHtml(record.කෙටි_නාමය)}</td>
-                    <td>${escapeHtml(record.පිටුව_හා_පේළිය)}</td>
-                    <td>${escapeHtml(record.සංස්කාරක)}</td>
+                    <td>${escapeHtml(record.ප්‍රවර්ගය)}</td>
+                    <td>${escapeHtml(record.අර්ථය)}</td>
+                    <td>${escapeHtml(record.නිරුක්තිය)}</td>
                     <td class="actions">
                         ${IS_ADMIN ? `
                         <button class=\"action-btn edit-btn\" onclick=\"editRecord(${record.id})\">\n                            <i class=\"fas fa-edit\"></i> Edit\n                        </button>\n                        <button class=\"action-btn delete-btn\" onclick=\"deleteRecord(${record.id})\">\n                            <i class=\"fas fa-trash\"></i> Delete\n                        </button>` : ''}
@@ -958,7 +950,7 @@ $isAdmin = auth_is_admin();
         }
 
         function loadSuggestions(term) {
-            fetch(`api.php?action=get_suggestions&term=${encodeURIComponent(term)}`)
+            fetch(`akshara_api.php?action=get_suggestions&term=${encodeURIComponent(term)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data.length > 0) {
@@ -998,40 +990,16 @@ $isAdmin = auth_is_admin();
             editingRecordId = id;
             document.getElementById('modalTitle').textContent = 'Edit Entry';
             
-            fetch(`api.php?action=get_record&id=${id}`)
+            fetch(`akshara_api.php?action=get_record&id=${id}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data) {
                         const record = data.data;
                         document.getElementById('recordId').value = record.id;
                         document.getElementById('word').value = record.වචනය;
-                        document.getElementById('quote').value = record.උද්ධෘතය;
-                        document.getElementById('shortName').value = record.කෙටි_නාමය;
-                        document.getElementById('pageLine').value = record.පිටුව_හා_පේළිය;
-                        document.getElementById('editor').value = record.සංස්කාරක;
-                        entryModal.style.display = 'flex';
-                    } else {
-                        showError('Failed to load record data');
-                    }
-                })
-                .catch(error => {
-                    showError('Error loading record: ' + error.message);
-                });
-        }
-
-        function copyRecord(id) {
-            fetch(`api.php?action=get_record&id=${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.data) {
-                        const record = data.data;
-                        document.getElementById('modalTitle').textContent = 'Copy Entry';
-                        document.getElementById('recordId').value = '';
-                        document.getElementById('word').value = record.වචනය;
-                        document.getElementById('quote').value = record.උද්ධෘතය;
-                        document.getElementById('shortName').value = record.කෙටි_නාමය;
-                        document.getElementById('pageLine').value = record.පිටුව_හා_පේළිය;
-                        document.getElementById('editor').value = record.සංස්කාරක;
+                        document.getElementById('category').value = record.ප්‍රවර්ගය;
+                        document.getElementById('meaning').value = record.අර්ථය;
+                        document.getElementById('etymology').value = record.නිරුක්තිය;
                         entryModal.style.display = 'flex';
                     } else {
                         showError('Failed to load record data');
@@ -1044,7 +1012,7 @@ $isAdmin = auth_is_admin();
 
         function deleteRecord(id) {
             if (confirm('Are you sure you want to delete this entry? This action cannot be undone.')) {
-                fetch(`api.php?action=delete_record&id=${id}`)
+                fetch(`akshara_api.php?action=delete_record&id=${id}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
@@ -1064,14 +1032,13 @@ $isAdmin = auth_is_admin();
             const formData = {
                 id: document.getElementById('recordId').value,
                 word: document.getElementById('word').value,
-                quote: document.getElementById('quote').value,
-                shortName: document.getElementById('shortName').value,
-                pageLine: document.getElementById('pageLine').value,
-                editor: document.getElementById('editor').value
+                category: document.getElementById('category').value,
+                meaning: document.getElementById('meaning').value,
+                etymology: document.getElementById('etymology').value
             };
 
             // Validate required fields
-            if (!formData.word || !formData.quote || !formData.shortName || !formData.pageLine || !formData.editor) {
+            if (!formData.word || !formData.category || !formData.meaning || !formData.etymology) {
                 showError('Please fill in all required fields');
                 return;
             }
@@ -1079,7 +1046,7 @@ $isAdmin = auth_is_admin();
             saveBtn.disabled = true;
             saveBtn.textContent = 'Saving...';
 
-            fetch('api.php?action=save_record', {
+            fetch('akshara_api.php?action=save_record', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1130,11 +1097,6 @@ $isAdmin = auth_is_admin();
             setTimeout(() => {
                 errorAlert.style.display = 'none';
             }, 5000);
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString();
         }
 
         function escapeHtml(text) {
